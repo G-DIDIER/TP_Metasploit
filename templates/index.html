@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Monitoring</title>
+    <style>
+        /* Styles pour la page */
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        table {
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        /* Styles pour le tableau des services */
+        #services-table td {
+            text-align: center;
+        }
+
+        #services-table td.service {
+            font-weight: bold;
+        }
+
+        #services-table td.count {
+            font-size: 20px;
+        }
+
+        /* Styles pour le tableau des logs */
+        #logs-table td {
+            vertical-align: top;
+        }
+
+        #logs-table td.filename {
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+
+
+<h1>Nombre de logs par minute (30 dernières minutes)</h1>
+<div style="text-align:center">
+    <img id="logs_graph_img" src="{{ url_for('static', filename='logs_per_minute.png') }}" alt="Graphique des logs par
+    minute">
+</div>
+
+<h1>Services Logs</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Service</th>
+        <th>Nombre de Logs</th>
+    </tr>
+    </thead>
+    <tbody id="services-table">
+    <tr>
+        <td>apache_access</td>
+        <td id="apache_access"></td>
+    </tr>
+    <tr>
+        <td>apache_error</td>
+        <td id="apache_error"></td>
+    </tr>
+    <tr>
+        <td>auth</td>
+        <td id="auth"></td>
+    </tr>
+    <tr>
+        <td>daemon</td>
+        <td id="daemon"></td>
+    </tr>
+    <tr>
+        <td>dpkg</td>
+        <td id="dpkg"></td>
+    </tr>
+    <tr>
+        <td>kern</td>
+        <td id="kern"></td>
+    </tr>
+    <tr>
+        <td>mail</td>
+        <td id="mail"></td>
+    </tr>
+    </tbody>
+</table>
+
+<h1>Last 20 Logs</h1>
+<table>
+    <thead>
+    <tr>
+        <th>Service</th>
+        <th>Filename</th>
+        <th>Timestamp</th>
+        <th>Line</th>
+    </tr>
+    </thead>
+    <tbody id="logs-table">
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        updateServices();
+        updateLogs();
+        setInterval(updateServices, 5000);
+        setInterval(updateLogs, 5000);
+        setInterval(refreshLogsGraph, 60000);
+    });
+
+    function updateServices() {
+        $.getJSON("/services", function (data) {
+            $("#apache_access").text(data.apache_access);
+            $("#apache_error").text(data.apache_error);
+            $("#auth").text(data.auth);
+            $("#daemon").text(data.daemon);
+            $("#dpkg").text(data.dpkg);
+            $("#kern").text(data.kern);
+            $("#mail").text(data.mail);
+        });
+    }
+
+    function updateLogs() {
+        $.getJSON("/logs/all/20", function (data) {
+            $("#logs-table").empty();
+            for (var i = 0; i < data.length; i++) {
+                var row = "<tr><td>" + data[i].service + "</td><td>" + data[i].filename + "</td><td>" + data[i].timestamp +
+                    "</td><td>" + data[i].line + "</td></tr>";
+                $("#logs-table").append(row);
+            }
+        });
+    }
+
+    function refreshLogsGraph() {
+        // Effectue une requête GET à l'URL "/logs/minutes"
+        $.ajax({
+            url: "/logs/minutes",
+            method: "GET",
+            dataType: "json"
+        })
+            .done(function (data) {
+                if (data.status === "ok") {  // Vérifie si la réponse contient "status: ok"
+                    // Rafraîchit l'image avec l'ID "logs_graph_img"
+                    const img = $("#logs_graph_img");
+                    img.attr("src", "{{ url_for('static', filename='logs_per_minute.png') }}?" + Date.now());
+                }
+            })
+            .fail(function (jqXHR, textStatus, errorThrown) {
+                console.error(errorThrown);  // Gère les erreurs de requête
+            });
+    }
+
+</script>
+</body>
+</html>

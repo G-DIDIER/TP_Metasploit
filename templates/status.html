@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server Status</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        td.status {
+            font-weight: bold;
+            text-align: center;
+        }
+
+        td.running {
+            background-color: #4CAF50;
+            color: #000;
+        }
+
+        td.stopped {
+            background-color: #f44336;
+            color: #fff;
+        }
+
+    </style>
+</head>
+<body>
+<h1>Server Status</h1>
+<table>
+    <tr>
+        <th>Service</th>
+        <th>Status</th>
+    </tr>
+    <tr>
+        <td>Apache</td>
+        <td class="{{ apache_status|lower }} status {{ apache_status|lower }}">
+            {{ apache_status }}
+        </td>
+    </tr>
+    <tr>
+        <td>MySQL</td>
+        <td class="{{ mysql_status|lower }} status {{ mysql_status|lower }}">
+            {{ mysql_status }}
+        </td>
+    </tr>
+    <tr>
+        <td>Telnet</td>
+        <td class="{{ telnet_status|lower }} status {{ telnet_status|lower }}">
+            {{ telnet_status }}
+        </td>
+    </tr>
+</table>
+</body>
+</html>
