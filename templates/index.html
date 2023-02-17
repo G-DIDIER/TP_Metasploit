@@ -114,57 +114,58 @@
 </table>
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-<script>
-    $(document).ready(function () {
-        updateServices();
-        updateLogs();
-        setInterval(updateServices, 5000);
-        setInterval(updateLogs, 5000);
-        setInterval(refreshLogsGraph, 60000);
-    });
-
-    function updateServices() {
-        $.getJSON("/services", function (data) {
-            $("#apache_access").text(data.apache_access);
-            $("#apache_error").text(data.apache_error);
-            $("#auth").text(data.auth);
-            $("#daemon").text(data.daemon);
-            $("#dpkg").text(data.dpkg);
-            $("#kern").text(data.kern);
-            $("#mail").text(data.mail);
-        });
-    }
-
-    function updateLogs() {
-        $.getJSON("/logs/all/20", function (data) {
-            $("#logs-table").empty();
-            for (var i = 0; i < data.length; i++) {
-                var row = "<tr><td>" + data[i].service + "</td><td>" + data[i].filename + "</td><td>" + data[i].timestamp +
-                    "</td><td>" + data[i].line + "</td></tr>";
-                $("#logs-table").append(row);
-            }
-        });
-    }
-
-    function refreshLogsGraph() {
-        // Effectue une requête GET à l'URL "/logs/minutes"
-        $.ajax({
-            url: "/logs/minutes",
-            method: "GET",
-            dataType: "json"
-        })
-            .done(function (data) {
-                if (data.status === "ok") {  // Vérifie si la réponse contient "status: ok"
-                    // Rafraîchit l'image avec l'ID "logs_graph_img"
-                    const img = $("#logs_graph_img");
-                    img.attr("src", "{{ url_for('static', filename='logs_per_minute.png') }}?" + Date.now());
-                }
-            })
-            .fail(function (jqXHR, textStatus, errorThrown) {
-                console.error(errorThrown);  // Gère les erreurs de requête
-            });
-    }
-
-</script>
 </body>
 </html>
+
+
+<script>
+$(document).ready(function () {
+    updateServices();
+    updateLogs();
+    setInterval(updateServices, 5000);
+    setInterval(updateLogs, 5000);
+    setInterval(refreshLogsGraph, 60000);
+});
+
+function updateServices() {
+    $.getJSON("/services", function (data) {
+        $("#apache_access").text(data.apache_access);
+        $("#apache_error").text(data.apache_error);
+        $("#auth").text(data.auth);
+        $("#daemon").text(data.daemon);
+        $("#dpkg").text(data.dpkg);
+        $("#kern").text(data.kern);
+        $("#mail").text(data.mail);
+    });
+}
+
+function updateLogs() {
+    $.getJSON("/logs/all/20", function (data) {
+        $("#logs-table").empty();
+        for (var i = 0; i < data.length; i++) {
+            var row = "<tr><td>" + data[i].service + "</td><td>" + data[i].filename + "</td><td>" + data[i].timestamp +
+                "</td><td>" + data[i].line + "</td></tr>";
+            $("#logs-table").append(row);
+        }
+    });
+}
+
+function refreshLogsGraph() {
+    // Effectue une requête GET à l'URL "/logs/minutes"
+    $.ajax({
+        url: "/logs/minutes",
+        method: "GET",
+        dataType: "json"
+    })
+        .done(function (data) {
+            if (data.status === "ok") {  // Vérifie si la réponse contient "status: ok"
+                // Rafraîchit l'image avec l'ID "logs_graph_img"
+                const img = $("#logs_graph_img");
+                img.attr("src", "{{ url_for('static', filename='logs_per_minute.png') }}?" + Date.now());
+            }
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            console.error(errorThrown);  // Gère les erreurs de requête
+        });
+}
+</script>

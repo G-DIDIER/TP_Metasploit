@@ -23,6 +23,18 @@ def check_service_status(hostname, port):
     except OSError:
         return False
 
+@app.route('/status')
+def status():
+    hostname = '127.0.0.1'
+    apache_status = 'Running' if check_service_status(hostname, 80) else 'Stopped'
+    mysql_status = 'Running' if check_service_status(hostname, 3306) else 'Stopped'
+    telnet_status = 'Running' if check_service_status(hostname, 23) else 'Stopped'
+    return render_template(
+        'status.html',
+        apache_status=apache_status,
+        mysql_status=mysql_status,
+        telnet_status=telnet_status)
+
 
 @app.route('/logs/<string:service>/<int:limit>')
 def get_logs(service, limit):
@@ -38,33 +50,9 @@ def get_logs(service, limit):
             for log in result]
 
 
-@app.route('/status')
-def status():
-    hostname = '127.0.0.1'
-    apache_status = 'Running' if check_service_status(hostname, 80) else 'Stopped'
-    mysql_status = 'Running' if check_service_status(hostname, 3306) else 'Stopped'
-    telnet_status = 'Running' if check_service_status(hostname, 23) else 'Stopped'
-    return render_template('status.html', apache_status=apache_status, mysql_status=mysql_status,
-                           telnet_status=telnet_status)
-
-
 @app.route('/')
 def index():
-    # Appel à l'API
-    response = requests.get("http://127.0.0.1:5000/logs/all/25")
-    # Récupération des logs
-    logs = response.json()
-    # Formatage des logs pour l'affichage
-    formatted_logs = []
-    for log in logs:
-        if log["timestamp"] is not None:
-            date = datetime.fromtimestamp(log["timestamp"]).strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            date = ""
-        service = log["service"]
-        formatted_logs.append({"date": date, "service": service, "line": log["line"]})
-    # Affichage des logs dans un tableau
-    return render_template("index.html", logs=formatted_logs)
+    return render_template("index.html")
 
 
 # Route pour récupérer le nombre de documents générés depuis la dernière seconde pour chaque service

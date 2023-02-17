@@ -14,7 +14,8 @@ log_dir = "log/"
 # Collection unique pour les logs
 log_collection = "logs"
 os.system(
-    "sshfs -o KexAlgorithms=diffie-hellman-group14-sha1 -oHostKeyAlgorithms=+ssh-dss msfadmin@127.0.0.1:/var/log/ ./log")
+    "sshfs -o KexAlgorithms=diffie-hellman-group14-sha1 "
+    "-oHostKeyAlgorithms=+ssh-dss msfadmin@127.0.0.1:/var/log/ ./log")
 
 idx_id = 0
 # Boucle infinie
@@ -23,7 +24,7 @@ while True:
     for root, dirs, files in os.walk(log_dir):
         for filename in files:
             # Vérification que le fichier est un fichier de log
-            if filename.endswith(".log") or filename.endswith(".gz"):
+            if filename.endswith(".log"):
                 # Détermination du nom de service
                 service_name = re.sub(r'\..*', '', filename)
 
